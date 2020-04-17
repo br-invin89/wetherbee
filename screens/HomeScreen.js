@@ -72,14 +72,8 @@ class HomeScreen extends React.Component {
       showEnglish: true,
       user: [],
       username: "",
-      question: {
-        question: "",
-        choices: [],
-        answers: [],
-        correctAnswer: "",
-        selectedAnswer: "",
-        isAnswered: false,
-      },
+      question: undefined,
+      answer: ""
     };
   }
 
@@ -93,17 +87,8 @@ class HomeScreen extends React.Component {
 					Functions.fetchWords(token, this.updateWords);
 					Functions.fetchCourses(token, this.updateCourses);
 					Functions.fetchPopular(token, this.updatePopular);					
-					*/
-          const question = {
-            question:
-              "Unlike the nylon parachutes of today, these bend as they catch the air, Raphael's design, if constructed, would be rigid and unwieldy: its frame consisted of twenty-two-foot-long wooden poles shaped into a pyramid",
-            choices: ["A. NO CHANGE", "B. which", "C. those", "D. they"],
-            answers: ["A", "B", "C", "D"],
-            selectedAnswer: "",
-            correctAnswer: "C",
-            isAnswered: false,
-          };
-          this.updateQuestion(question);
+          */
+          Functions.fetchQuestion(token, this.updateQuestion, 'English');
         });
         AsyncStorage.getItem("user").then((user) => {
           console.log("USER ===> " + user);
@@ -111,6 +96,12 @@ class HomeScreen extends React.Component {
         });
       }, 1200);
     });
+  }
+
+  updateQuestion = ({ question }) => {
+    console.log('---101---');
+    console.log(question);
+    this.setState({ question });
   }
 
   updateWords = (words) => {
@@ -126,10 +117,6 @@ class HomeScreen extends React.Component {
   updatePopular = (popular) => {
     this.setState({ popular: popular });
     console.log(this.state.popular);
-  };
-
-  updateQuestion = (question) => {
-    this.setState({ question });
   };
 
   handlePlayAndPause = () => {
@@ -454,13 +441,13 @@ class HomeScreen extends React.Component {
   }
 
   renderQuestion = () => {
-    const { question } = this.state;
-    if (question.isAnswered) {
-      return <></>;
-		}
-		if (question.question=='') {
-			return <></>;
-		}
+    const { question, answer } = this.state;
+    if (!question) {
+      return (
+        <>
+        </>
+      )
+    }
     return (
       <View>
         <Text
@@ -476,133 +463,122 @@ class HomeScreen extends React.Component {
         >
           Question of the day
         </Text>
-        <View
-          style={{
-            marginHorizontal: "9.07%",
-            marginVertical: 5,
-            padding: 15,
-            borderRadius: 10,
-            borderColor: "#0DB09F",
-            borderWidth: 0.5,
-            backgroundColor: "#FFFFFF",
-            boxShadow: "0 20px 36px 0 rgba(0,0,0,0.05)",
-          }}
-        >
-          <Text
-            style={{
-              paddingBottom: 10,
-            }}
-          >
-            {question.question}
-          </Text>
-          <View style={{}}>
-            {question.choices.map((choice, index) => (
-              <Text key={"question-choice-" + index}>{choice}</Text>
-            ))}
-          </View>
+        {answer == '' ?
           <View
             style={{
-              marginBottom: 5,
-              marginTop: 15,
-              marginHorizontal: 20,
-              flexDirection: "row",
-              justifyContent: "space-around",
+              marginHorizontal: "9.07%",
+              marginVertical: 5,
+              padding: 15,
+              borderRadius: 10,
+              borderColor: "#0DB09F",
+              borderWidth: 0.5,
+              backgroundColor: "#FFFFFF",
+              boxShadow: "0 20px 36px 0 rgba(0,0,0,0.05)",
             }}
           >
-            {question.answers.map((answer, index) => (
-              <TouchableOpacity
-                style={[
-                  {
-                    borderColor: "#0DB09F",
-                    borderWidth: 0.5,
-                    borderRadius: "50%",
-                    width: 36,
-                    height: 36,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  },
-                  answer == question.selectedAnswer && {
-                    backgroundColor: "#0DB09F",
-                  },
-                ]}
-                onPress={() => this.setAnswer(answer)}
-              >
-                <Text
-                  key={"question-answer-" + index}
+            <Text
+              style={{
+                paddingBottom: 10,
+              }}
+            >
+              {question.content.description}
+            </Text>
+            <View
+              style={{
+                marginBottom: 5,
+                marginTop: 15,
+                marginHorizontal: 20,
+                flexDirection: "row",
+                justifyContent: "space-around",
+              }}
+            >
+              {question.answers.map((answer, index) => (
+                <TouchableOpacity
                   style={[
                     {
-                      fontSize: 24,
-                      color: "#0DB09F",
+                      borderColor: "#0DB09F",
+                      borderWidth: 0.5,
+                      borderRadius: "50%",
+                      width: 36,
+                      height: 36,
+                      alignItems: "center",
+                      justifyContent: "center",
                     },
-                    answer == question.selectedAnswer && {
-                      color: "#FFF",
+                    /*
+                    answer == question.correctAnswer && {
+                      backgroundColor: "#0DB09F",
                     },
+                    */
                   ]}
+                  onPress={() => this.setAnswer(answer)}
                 >
-                  {answer}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    key={"question-answer-" + index}
+                    style={[
+                      {
+                        fontSize: 24,
+                        color: "#0DB09F",
+                      },
+                      answer == question.selectedAnswer && {
+                        color: "#FFF",
+                      },
+                    ]}
+                  >
+                    {answer}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
+        :
+          <>
+            <View
+              style={{
+                marginHorizontal: '7.5%'
+              }}
+            >
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 14, lineHeight: 24, marginRight: 10 }}>Selected Answer:</Text>
+                <Text style={{ color: '#0DB09F', fontSize: 18, lineHeight: 24 }}>{answer}</Text>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={{ fontSize: 14, lineHeight: 24, marginRight: 10 }}>Correct Answer:</Text>
+                <Text style={{ color: '#0DB09F', fontSize: 18, lineHeight: 24 }}>{question.correctAnswer}</Text>
+              </View>
+            </View>
+            <Video
+              source={{
+                uri: question.content.videoLink,
+              }}
+              shouldPlay={this.state.shouldPlay}
+              resizeMode="cover"
+              useNativeControls={true}
+              style={{
+                height: 187,
+                top: 69 - 44 - 35.71 + 17 + 25 + 15,
+                width: "85.33%",
+                left: "7.47%",
+                borderRadius: 5.5,
+              }}
+              isMuted={this.state.mute}
+            />
+
+            <View style={styles.controlBar}></View>
+          </>
+        }        
       </View>
     );
   };
 
-  setAnswer = (answer) => {
-    let { question } = this.state;
-    question.selectedAnswer = answer;
-    question.isAnswered = true;
+  setAnswer = (newAnswer) => {
+    let { question, answer } = this.state;
+    answer = newAnswer;
     this.setState({
       ...this.state,
-      question,
+      answer,
     });
   };
 
-  renderVideo = () => {
-		if (!this.state.question.isAnswered) {
-			return (
-				<></>
-			)
-		}
-		const { question } = this.state;
-    return (
-      <>
-				<View
-					style={{
-						marginHorizontal: '7.5%'
-					}}
-				>
-					<View style={{ flexDirection: 'row' }}>
-						<Text style={{ fontSize: 14, lineHeight: 24, marginRight: 10 }}>Selected Answer:</Text>
-						<Text style={{ color: '#0DB09F', fontSize: 18, lineHeight: 24 }}>{question.selectedAnswer}</Text>
-					</View>
-					<View style={{ flexDirection: 'row' }}>
-						<Text style={{ fontSize: 14, lineHeight: 24, marginRight: 10 }}>Correct Answer:</Text>
-						<Text style={{ color: '#0DB09F', fontSize: 18, lineHeight: 24 }}>{question.correctAnswer}</Text>
-					</View>
-				</View>
-        <Video
-          source={{
-            uri: "http://d23dyxeqlo5psv.cloudfront.net/big_buck_bunny.mp4",
-          }}
-          shouldPlay={this.state.shouldPlay}
-          resizeMode="cover"
-          useNativeControls={true}
-          style={{
-            height: 187,
-            top: 69 - 44 - 35.71 + 17 + 25 + 15,
-            width: "85.33%",
-            left: "7.47%",
-            borderRadius: 5.5,
-          }}
-          isMuted={this.state.mute}
-        />
-
-        <View style={styles.controlBar}></View>
-      </>
-    );
-  };
 
   /* 
 	renderItem = ({item}) => (
@@ -774,7 +750,6 @@ class HomeScreen extends React.Component {
 								*/}
                 {this.renderQuestion()}
               </View>
-              {this.renderVideo()}
 
               <Text
                 style={{

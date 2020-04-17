@@ -2,6 +2,7 @@ import Constants from "expo-constants";
 import AsyncStorage from "react-native";
 import React from "react";
 const url = "192.168.8.128:8081";
+import {decode, encode} from 'base-64'
 
 //Constants.platform.ios.model != 'Simulator' ? 'Brendons-MacBook-Pro.local' : 'localhost'
 var hasToken = false;
@@ -46,7 +47,7 @@ function signUp(
 
 function logIn(updateLogin, phone, password) {
   phone = phone.replace(/[-+()\s]/g, "");
-  const credentials = btoa(`${phone}:${password}`);
+  const credentials = encode(`${phone}:${password}`);
 
   fetch("http://" + url + "/auth/login", {
     method: "POST",
@@ -118,6 +119,23 @@ function fetchQuestions(token, updateQuestions, termId) {
     response.json()
   ).then((responseJson) => {
     updateQuestions(responseJson);
+  }).catch((error) => {
+    console.error(error);
+  });
+}
+
+function fetchQuestion(token, updateQuestion, category) {
+  fetch(`http://${url}/api/questions/getPresentOnHome/category/${category}`, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+  }).then((response) => 
+    response.json()
+  ).then((responseJson) => {
+    updateQuestion(responseJson);
   }).catch((error) => {
     console.error(error);
   });
@@ -553,6 +571,10 @@ function updateImage(token, updateImage, imageUrl, userId) {
 export default {
   signUp,
   logIn,
+  fetchQuestion,
+
+
+
   fetchQuestions,
   fetchTerms,
   fetchWords,
