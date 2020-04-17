@@ -977,27 +977,12 @@ class SignUp2Screen extends React.Component {
   }
 
   updateResponse = (response) => {
-    this.setState({ response: response });
-    console.log("updateLogin = (response) => {");
-
-    console.log(response);
-    if (this.state.response.results.length == 0) {
-      Alert.alert(
-        "A user with that phone number already exists.",
-        "",
-        [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          { text: "OK", onPress: () => console.log("OK Pressed") },
-        ],
-        { cancelable: false }
-      );
+    if (response.error) {
+      Alert.alert(response.error.message);
     } else {
-      this.saveUser(this.state.response);
-      this.props.navigation.navigate("Main");
+      Alert.alert(response.message);
+      // this.saveUser(this.state.response);
+      this.props.navigation.navigate("LogIn");
     }
   };
 
@@ -1010,31 +995,21 @@ class SignUp2Screen extends React.Component {
       this.props.navigation.state.params.email == 0 ||
       this.props.navigation.state.params.currentGrade == 0
     ) {
-      Alert.alert(
-        "Please check all fields before submitting.",
-        "",
-        [
-          {
-            text: "Cancel",
-            onPress: () => console.log("Cancel Pressed"),
-            style: "cancel",
-          },
-          { text: "OK", onPress: () => console.log("OK Pressed") },
-        ],
-        { cancelable: false }
-      );
+      Alert.alert("Please check all fields before submitting.");
     } else {
       Functions.signUp(
         this.updateResponse,
         this.props.navigation.state.params.fullName,
-        this.props.navigation.state.params.schoolName,
         this.props.navigation.state.params.phoneNum,
         this.props.navigation.state.params.password,
         this.props.navigation.state.params.email,
+        this.props.navigation.state.params.schoolName,
         this.props.navigation.state.params.currentGrade,
-        this.state.ACT,
-        this.state.SAT,
-        this.state.PSAT
+        {
+          ACT: this.state.ACT,
+          SAT: this.state.SAT,
+          PSAT: this.state.PSAT          
+        }        
       );
     }
   };

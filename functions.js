@@ -8,43 +8,30 @@ var hasToken = false;
 
 function signUp(
   updateResponse,
-  fullName,
-  schoolName,
-  phoneNumber,
+  name,
+  phone,
   password,
   email,
+  schoolName,
   grade,
-  act,
-  sat,
-  psat
+  examTypes
 ) {
-  //INSERT INTO `Wetherbee`.`USERS` (`ID`, `FIRST_NAME`, `LAST_NAME`, `SCHOOL_NAME`, `PHONE_NUMBER`, `EMAIL`, `GRADE`, `PASSWORD`, `ACT_EXAM`, `SAT_EXAM`, `PSAT_EXAM`, `ALLOW_PARENTS`, `IMAGE`) VALUES ('1', 'Brendon', 'Brendon', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc', 'abc')
+  phone = phone.replace(/[-+()\s]/g, "");
 
-  var firstName = fullName.split(" ")[0];
-  var lastname = fullName.split(" ")[1];
-
-  let phoneNum = phoneNumber.replace(/[-+()\s]/g, "");
-
-  fetch("http://" + url + "/auth/signup", {
+  fetch("http://" + url + "/auth/register", {
     method: "POST",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      FIRST_NAME: firstName,
-      LAST_NAME: lastname,
-      SCHOOL_NAME: schoolName,
-      PHONE_NUMBER: phoneNum,
-      PASSWORD: password,
-      EMAIL: email,
-      GRADE: grade,
-      ACT_EXAM: act ? 1 : 0,
-      SAT_EXAM: sat ? 1 : 0,
-      PSAT_EXAM: psat ? 1 : 0,
-      ALLOW_PARENTS: 0,
-      IMAGE: "",
-      USERNAME: "",
+      name,
+      phone,
+      password,
+      email,
+      schoolName,
+      grade,
+      examTypes
     }),
   }).then((response) => 
     response.json()
@@ -57,9 +44,8 @@ function signUp(
   });
 }
 
-function logIn(updateLogin, phoneNumber, password) {
-  let phone = phoneNumber.replace(/[-+()\s]/g, "");
-  console.log(phone + " " + password);
+function logIn(updateLogin, phone, password) {
+  phone = phone.replace(/[-+()\s]/g, "");
   const credentials = btoa(`${phone}:${password}`);
 
   fetch("http://" + url + "/auth/login", {
